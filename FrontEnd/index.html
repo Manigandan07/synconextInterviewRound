@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<h1><center>Choose Your Mobile Network</center></h1>
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.2/angular.min.js"></script>
+	<style>
+		table,td,th{
+			padding: 15px;
+  			text-align: center;
+  			width: 100%;
+  			border: 1px solid black;
+  			border-collapse: collapse;
+  			height: 50%;
+  			table-layout: fixed;
+
+		}
+		#ProviderDetails{
+			text-align: left;
+		}
+		th{
+			background-color: MediumSeaGreen ;
+		}
+		td{
+			background-color: LightGray ;
+		}
+		#searchSuggestion{
+			/*background-color: LightGray;*/
+			/*position: relative;*/
+			margin-left: 90px;
+			top :-3px;
+			margin-right: 10px
+			button:100px;
+			z-index: 10;
+		}
+		#searchButton{
+			width: 30%;
+		}
+	</style>
+</head>
+<body>
+	
+
+	<div  ng-app = "myApp" ng-controller = "myController">
+		<h1>Home
+			 <input type="text" name="searchField" id="searchButton" ng-model="searchName" ng-change="autoComplete();searchCheck=true"/> 
+			
+			 <input type="Button" value="Search" ng-cl>
+			 </h1>
+			  <div ng-if=searchCheck >
+			 	<div id = "searchSuggestion"  ng-repeat = "x in autoCompleteList">
+			 		{{x}}
+			 	</div>
+			 </div>
+		<table ng-init = "order = 'lowestPrice'">
+			<tr>
+				<th>Provider</th>
+				<th>Amount</th>
+				<th>Details</th>
+			</tr>
+			<tr ng-repeat = "x in values | orderBy : order" ng-init = "check = false">
+				<td>{{x.name}}</td>
+				<td>₹{{x.lowestPrice}}</td>
+				<td>
+					<input type="button" value="Details" name="button" ng-click="desc($index);check = true"/>
+						<div ng-if="check" id= "ProviderDetails">
+						<p>Name : {{name1}}</p>
+						<p>LowestProce : {{lowestPrice1}}</p>
+						<p>Rating : {{rating}}</p>
+						<p>MaxSpeed: {{maxSpeed}}</p>
+						<p>DesCription : {{description}}</p>
+						<p>email : {{email}}</p>
+						<p>url : {{url}}</p>
+					</div>
+				</td>
+			</tr>
+		
+		</table><br>
+		<center>
+		<form>
+			Sorted By :
+			<input type="radio" name="sort" value="price" checked>Price
+			<input type="radio" name="sort" value="rating" ng-change="sortingOrder('rating')" ng-model="order"/>Rating<br>	
+		</form>
+		</center>
+		
+	</div>
+
+	<script>
+		var app = angular.module('myApp',[]);
+		app.controller('myController',function($scope,$http){
+			$http.get("http://localhost:8013/service/getHomePageValue")
+			.then(function (response){
+				$scope.values = response.data.homePageRsponsesList;
+				// $scope.check = false;
+				console.log("answer=",response.data.homePageRsponsesList);
+				$scope.desc = function(index){
+					console.log("comming",index);
+					$scope.check = true;
+					$scope.name1 = response.data.homePageRsponsesList[index].name;
+					//console.log(response.data.homePageRsponsesList[index].name);
+					$scope.lowestPrice1 = response.data.homePageRsponsesList[index].lowestPrice;
+					$scope.rating = response.data.homePageRsponsesList[index].rating;
+					$scope.maxSpeed = response.data.homePageRsponsesList[index].maxSpeed;
+					$scope.description = response.data.homePageRsponsesList[index].description;
+					$scope.email = response.data.homePageRsponsesList[index].email;
+					$scope.url = response.data.homePageRsponsesList[index].url;
+
+				};	
+
+				$scope.sortingOrder = function(value){
+					console.log(value);
+					if(value == 'rating'){
+						console.log(value);
+						$scope.order = 'rating';
+					}
+					if(value == 'price'){
+						$scope.order = 'lowestPrice';
+					}
+				};
+
+				$scope.autoComplete = function(){
+					$http.get("http://localhost:8013/service/autoComplete?name="+$scope.searchName)
+					.then(function (response){
+						$scope.autoCompleteList = response.data.autoCompleteWord;
+
+					})
+				};
+
+				
+			});
+			
+		});
+	</script>
+
+</body>
+</html>
